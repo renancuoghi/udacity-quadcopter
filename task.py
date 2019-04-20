@@ -2,7 +2,11 @@ import numpy as np
 from physics_sim import PhysicsSim
 
 class Task():
-    """Task (environment) that defines the goal and provides feedback to the agent."""
+    """Task (environment) that defines the goal and provides feedback to the agent.
+       The task to be learned is how to takeoff.
+       The quadcopter has an initial position of (0, 0, 0) and a target position of (0, 0, 20)
+    """
+    
     def __init__(self, init_pose=None, init_velocities=None, 
         init_angle_velocities=None, runtime=5., target_pos=None):
         """Initialize a Task object.
@@ -28,9 +32,24 @@ class Task():
 
     def get_reward(self):
         """Uses current pose of sim to return reward."""
-        reward = 1.-.3*(abs(self.sim.pose[:3] - self.target_pos)).sum()
-        return reward
-
+        # old reward
+        # reward = 1.-.3*(abs(self.sim.pose[:3] - self.target_pos)).sum()
+        #return reward
+        
+        # new reward
+        reward = 0.
+        start_penalty = 0.3
+        # starting penalty
+        pos_calculating = (np.sqrt(
+                            (abs(self.sim.pose[0] - self.target_pos[0])**2) + #pos x
+                            (abs(self.sim.pose[1] - self.target_pos[1])**2) + #pos y
+                            (abs(self.sim.pose[2] - self.target_pos[2])**2))) #pos z
+        penalty = start_penalty * pos_calculating
+        # add bonus
+        bonus = 10.
+        # return reward
+        return reward + bonus - penalty
+       
     def step(self, rotor_speeds):
         """Uses action to obtain next state, reward, done."""
         reward = 0
